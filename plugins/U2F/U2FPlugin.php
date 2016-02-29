@@ -45,16 +45,20 @@ class U2FPlugin extends Plugin
     public function onEndShowScripts($action)
     {
         static $needy = array(
+            'U2fregisterAction',
         );
 
         if (in_array(get_class($action), $needy)) {
-            //$action->script(...);
+            $action->script($this->path('js/extlib/u2f-api.js'));
         }
+
+        return true;
     }
 
     public function onRouterInitialized(URLMapper $m)
     {
-	    $m->connect('settings/u2f', array('action' => 'u2fsettings'));
+        $m->connect('settings/u2f', array('action' => 'u2fsettings'));
+        $m->connect('settings/u2f_register', array('action' => 'u2fregister'));
 
         return true;
     }
