@@ -29,7 +29,7 @@ class U2fadminpanelAction extends AdminPanelAction
     }   
 }
 
-clas U2fAdminPanelForm extends AdminForm
+class U2fAdminPanelForm extends AdminForm
 {
     public function id()
     {
