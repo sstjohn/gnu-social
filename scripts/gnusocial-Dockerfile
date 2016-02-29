@@ -1,0 +1,96 @@
+FROM debian:jessie
+
+RUN DEBIAN_FRONTEND="noninteractive" apt-get update && \
+    DEBIAN_FRONTEND="noninteractive" apt-get install -y \
+	screen \
+	vim-nox \
+	openssl \
+	mariadb-server-10.0 \
+	nginx \
+	php5-fpm \
+	php5-curl \
+	php5-gd \
+	php5-gmp \
+	php5-intl \
+	php5-json \
+	php5-mysqlnd \
+	gettext \
+	exif \
+	git 
+
+RUN 	mkdir /work && \
+ 	git clone -q -b werk \
+		https://git.gnu.io/sstjohn/gnu-social.git /work/gnu-social && \
+ 	mkdir -p /work/gnu-social/avatar /work/gnu-social/file && \
+ 	chgrp www-data \
+		/work/gnu-social \
+		/work/gnu-social/avatar \
+		/work/gnu-social/file && \
+	chmod g+w /work/gnu-social /work/gnu-social/avatar /work/gnu-social/file
+
+RUN 	mkdir -p /work/gnu-social/local/plugins && \
+	git clone -q https://git.gnu.io/h2p/Qvitter.git \
+		/work/gnu-social/local/plugins/Qvitter && \
+	git clone -q https://dev.pztrn.name/gstools/statistics-gnusocial-plugin.git \
+		/work/gnu-social/local/plugins/Statistics && \
+    	ln -s /work/gnu-social/local/plugins/Statistics/StatisticsPlugin-gnusocial.php \
+		/work/gnu-social/local/plugins/Statistics/StatisticsPlugin.php
+
+RUN	mkdir /work/ssl && \
+	openssl genrsa -out /work/ssl/server.key 2048 2>&1 && \
+	openssl req -new -batch \
+		-key /work/ssl/server.key \
+		-out /work/ssl/server.csr \
+		-subj /commonName=* && \
+	openssl x509 -req \
+		-in /work/ssl/server.csr \
+		-signkey /work/ssl/server.key \
+		-out /work/ssl/server.crt \
+		-days 90 \
+		-extensions v3_req 2>&1 && \
+	openssl dhparam -out /work/ssl/dhparams.pem 2048 2>&1
+
+RUN sed -e "s/^\s*server_name/#server_name/" \
+	-e "s~ssl/certs/social.example.org.crt~/work/ssl/server.crt~" \
+	-e "s~ssl/private/social.example.org.key~/work/ssl/server.key~" \
+	-e "s~/path/to/gnusocial/root~/work/gnu-social~" \
+	-e "/ssl_certificate_key/a #\n\
+  ssl_dhparam /work/ssl/dhparams.pem; \n\
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2; \n\
+  ssl_prefer_server_ciphers on; \n\
+  ssl_ciphers \"EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH\"; \n\
+  ssl_ecdh_curve secp384r1; \n\
+  ssl_session_cache shared:SSL:10m; \n\
+  ssl_session_tickets off; \n\
+  ssl_stapling on; \n\
+  ssl_stapling_verify on; \n" \
+	/work/gnu-social/nginx.conf.sample > /etc/nginx/sites-available/default
+
+RUN 	service mysql start &&			\
+ 	mysqladmin create social && 		\
+	mysql -e "grant all on social.* \
+		to 'social'@'localhost';"
+
+RUN sed -i \
+	-e "s/^;\{0,1\}opcache.enable=.*$/opcache.enable=1/" \
+	/etc/php5/fpm/php.ini
+
+EXPOSE 80 443
+
+CMD service mysql start && service php5-fpm start && service nginx start && \
+	if ! grep -q 'Qvitter' /work/gnu-social/config.php; then \
+		echo "configuration at https://`ip addr show eth0 | sed -n -e 's/^\s*inet \([^/]*\).*$/\1/p'`/install.php" && \
+		echo "db host: localhost" && \
+		echo "db name: social" && \
+		echo "db user: social" && \
+		echo "db pass: <leave blank>" && \
+		echo && \
+		while ! [ -f /work/gnu-social/config.php ]; do true; done && sleep 1 && \
+		echo "adding plugins to config.php" && \
+		echo "addPlugin(\"Qvitter\");" >> /work/gnu-social/config.php && \
+		echo "addPlugin(\"Statistics\");" >> /work/gnu-social/config.php && \
+		echo "\$config['db']['schemacheck'] = 'script';" >> /work/gnu-social/config.php && \
+		sleep 1 && php /work/gnu-social/scripts/checkschema.php && \
+		bash -c "read -rsp $'done! press any key to tail nginx error log forever...\n' -n1 key"; \
+	fi && \
+	screen -s bash tail -F /var/log/nginx/error.log
