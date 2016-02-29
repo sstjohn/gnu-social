@@ -11,26 +11,13 @@ class U2FPlugin extends Plugin
 
     public function initialize()
     {
+        require_once(dirname(__FILE__) . "/extlib/U2F.php");
         return true;
     }
 
     public function cleanup()
     {
         return true;
-    }
-
-    public function onAutoload($cls)
-    {
-        $dir = dirname(__FILE__);
-
-        switch ($cls)
-        {
-        case 'U2F':
-            include_once $dir . '/extlib/U2F.php';
-            return false;
-        }
-
-        return parent::onAutoload($cls);
     }
 
     public function onCheckSchema()
@@ -42,24 +29,11 @@ class U2FPlugin extends Plugin
         return true;
     }
 
-    public function onEndShowScripts($action)
-    {
-        static $needy = array(
-            'U2fregisterAction',
-        );
-
-        if (in_array(get_class($action), $needy)) {
-            $action->script($this->path('js/extlib/u2f-api.js'));
-        }
-
-        return true;
-    }
-
     public function onRouterInitialized(URLMapper $m)
     {
         $m->connect('settings/u2f', array('action' => 'u2fsettings'));
-        $m->connect('settings/u2f_register', array('action' => 'u2fregister'));
-
+        $m->connect('settings/u2f/register', array('action' => 'u2fregister'));
+        $m->connect('settings/u2f/registration_response', array('action' => 'u2fregresponse'));
         return true;
     }
 
@@ -75,6 +49,19 @@ class U2FPlugin extends Plugin
         return true;
     }
 
+    public function onEndShowHeadElements($action)
+    {
+        static $needy = array(
+            'U2fregisterAction',
+        );
+
+        if (in_array(get_class($action), $needy)) {
+            $action->script($this->path('js/extlib/u2f-api.js'));
+        }
+   
+        return true;
+    }
+            
     public function onPluginVersion(array &$versions)
     {
         $versions[] = array('name' => 'U2F',

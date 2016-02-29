@@ -21,11 +21,20 @@ class U2fsettingsAction extends SettingsAction
         $form  = new U2fSettingsForm($this);
         $form->show();
         return;
-    }
+   }
 
     public function saveSettings()
     {
     }   
+
+    protected function doPost()
+    {
+        if ($this->arg('newdev')) {
+            common_redirect(common_local_url('u2fregister'), 307);
+        } else if ($this->arg('submit')) {
+            return _('Settings saved.');
+        }
+    }
 }
 
 class U2fSettingsForm extends Form
@@ -68,7 +77,7 @@ class U2fSettingsForm extends Form
 
     public function formActions()
     {
-        $this->out->submit('submit', _m('BUTTON', 'Save'), 'submit', null,
-            _m('Save the U2F settings.'));
+        $this->out->submit('submit', _m('BUTTON', 'Save'));
+        $this->out->submit('newdev', _m('BUTTON', 'Add U2F device'));
     }
 }

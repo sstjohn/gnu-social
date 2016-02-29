@@ -4,6 +4,7 @@ if (!defined('STATUSNET')) {
     exit(1);
 }
 
+
 class U2fregisterAction extends SettingsAction
 {
     public function title()
@@ -32,7 +33,7 @@ class U2fRegisterForm extends Form
 {
     public function id()
     {
-        return 'u2fregister';
+        return 'u2fregistrationform';
     }
 
     public function formClass()
@@ -42,26 +43,42 @@ class U2fRegisterForm extends Form
 
     public function action()
     {
-        return common_local_url('u2fregister');
+        return common_local_url('u2fregresponse');
     }
 
     public function formData()
     {
+        $u2f = new u2flib_server\U2F("https://" . $_SERVER['HTTP_HOST']);
+        $script = <<<_END_OF_SCRIPT_
+
+var challenge = %s;
+u2f.register([challenge], [],
+    function(deviceResponse) {
+      document.getElementById('response-input').value = JSON.stringify(deviceResponse);
+      document.getElementById('u2fregistrationform').submit();
+    }
+);
+_END_OF_SCRIPT_;
+
+        $challenge = $u2f->getRegisterData();
+        $challenge_msg = json_encode($challenge[0]) . "\n";
+
+        $this->inlineScript(sprintf(
+            $script,
+            $challenge_msg
+        ));
+
         $this->out->elementStart(
             'fieldset',
             array('id' => 'settings_u2f_register')
         );
-        $this->out->elementStart('ul', 'form_data');
-
-        $this->li();
-        $this->out->element('p', 'form_guide', 'test test test');
-        $this->unli();
-
-        $this->out->elementEnd('ul');
+        $this->out->element('p', 'form_guide', $challenge_msg);
+        $this->out->hidden('response-input', '');
         $this->out->elementEnd('fieldset');
     }
 
     public function formActions()
     {
+        $this->out->submit('receive-response', _m('BUTTON', 'blah', 'hidden'));
     }
 }
