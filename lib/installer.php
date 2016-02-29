@@ -552,7 +552,7 @@ abstract class Installer
 
         $this->updateStatus("Initializing...");
         ini_set('display_errors', 1);
-        error_reporting(E_ALL & ~E_STRICT & ~E_NOTICE);
+        error_reporting(E_ALL & ~E_STRICT & ~E_NOTICE & ~E_DEPRECATED);
         if (!defined('GNUSOCIAL')) {
             define('GNUSOCIAL', true);
         }
