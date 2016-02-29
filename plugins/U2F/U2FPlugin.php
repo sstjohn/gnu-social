@@ -6,17 +6,34 @@ if (!defined('STATUSNET')) {
 
 class U2FPlugin extends Plugin
 {
-    function initialize()
+    const VERSION = GNUSOCIAL_VERSION;
+    public $U2FEnabled = false;
+
+    public function initialize()
     {
         return true;
     }
 
-    function cleanup()
+    public function cleanup()
     {
         return true;
     }
 
-    function onCheckSchema()
+    public function onAutoload($cls)
+    {
+        $dir = dirname(__FILE__);
+
+        switch ($cls)
+        {
+        case 'U2F':
+            include_once $dir . '/extlib/U2F.php';
+            return false;
+        }
+
+        return parent::onAutoload($cls);
+    }
+
+    public function onCheckSchema()
     {
         $schema = Schema::get();
 
@@ -25,38 +42,36 @@ class U2FPlugin extends Plugin
         return true;
     }
 
+    public function onEndShowScripts($action)
+    {
+        static $needy = array(
+        );
+
+        if (in_array(get_class($action), $needy)) {
+            //$action->script(...);
+        }
+    }
+
     public function onRouterInitialized(URLMapper $m)
     {
-	$m->connect('panel/u2f', array('action' => 'u2fadminpanel'));
+	    $m->connect('settings/u2f', array('action' => 'u2fsettings'));
 
         return true;
     }
 
-    public function onAdminPanelCheck($name, &$isOK)
+    public function onEndAccountSettingsNav($action)
     {
-        if ($name == 'u2f') {
-            $isOK = true;
-            return false;
-        }
+        $action_name = $action->trimmed('action');
+        $action->menuItem(
+            common_local_url('u2fsettings'),
+            _m('U2F'),
+            _m('U2F configuration page.'),
+            $action_name == 'u2fsettings'
+        );
         return true;
     }
 
-    public function onEndAdminPanelNav($nav)
-    {
-        if (AdminPanelAction::canAdmin('u2f')) {
-            $action_name = $nav->action->trimmed('action');
-            $nav->out->menuItem(
-                common_local_url('u2fadminpanel'),
-                _m('U2F'),
-                _m('U2F configuration page.'),
-                $action_name == 'u2fadminpanel',
-                'nav_u2f_admin_panel'
-            );
-        }
-        return true;
-    }
-
-    function onPluginVersion(array &$versions)
+    public function onPluginVersion(array &$versions)
     {
         $versions[] = array('name' => 'U2F',
                             'version' => GNUSOCIAL_VERSION,

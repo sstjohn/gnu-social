@@ -4,7 +4,7 @@ if (!defined('STATUSNET')) {
     exit(1);
 }
 
-class U2fadminpanelAction extends AdminPanelAction
+class U2fsettingsAction extends SettingsAction
 {
     public function title()
     {
@@ -18,22 +18,21 @@ class U2fadminpanelAction extends AdminPanelAction
 
     public function showForm()
     {
-        $form  = new U2fAdminPanelForm($this);
+        $form  = new U2fSettingsForm($this);
         $form->show();
         return;
     }
 
     public function saveSettings()
     {
-        return;
     }   
 }
 
-class U2fAdminPanelForm extends AdminForm
+class U2fSettingsForm extends Form
 {
     public function id()
     {
-        return 'u2fadminpanel';
+        return 'u2fsettings';
     }
 
     public function formClass()
@@ -43,7 +42,7 @@ class U2fAdminPanelForm extends AdminForm
 
     public function action()
     {
-        return common_local_url('u2fadminpanel');
+        return common_local_url('u2fsettings');
     }
 
     public function formData()
@@ -52,11 +51,15 @@ class U2fAdminPanelForm extends AdminForm
             'fieldset',
             array('id' => 'settings_u2f')
         );
-        $this->out->element('legend', null, _m('U2F settings'));
         $this->out->elementStart('ul', 'form_data');
 
         $this->li();
-        $this->out->element('p', 'form_guide', _m('Note: this is just a test.'));
+        $this->out->checkbox(
+            'enabled', 
+            _m('Enable U2F authentication'),
+            (bool) $this->value('u2f', 'enabled'),
+            _m("Enable two-factor authentication with U2F.")
+        );
         $this->unli();
 
         $this->out->elementEnd('ul');
@@ -65,6 +68,7 @@ class U2fAdminPanelForm extends AdminForm
 
     public function formActions()
     {
-        return;
+        $this->out->submit('submit', _m('BUTTON', 'Save'), 'submit', null,
+            _m('Save the U2F settings.'));
     }
 }
