@@ -37,7 +37,7 @@ class U2FPlugin extends Plugin
     {
         $schema = Schema::get();
 
-        $schema->ensureTable('u2f_user_data', U2f_user_data::schemaDef());
+        $schema->ensureTable('user_u2f_data', User_u2f_data::schemaDef());
 
         return true;
     }

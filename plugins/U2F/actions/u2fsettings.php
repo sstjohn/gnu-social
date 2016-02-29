@@ -57,7 +57,7 @@ class U2fSettingsForm extends Form
         $this->out->checkbox(
             'enabled', 
             _m('Enable U2F authentication'),
-            (bool) $this->value('u2f', 'enabled'),
+            false ,
             _m("Enable two-factor authentication with U2F.")
         );
         $this->unli();
