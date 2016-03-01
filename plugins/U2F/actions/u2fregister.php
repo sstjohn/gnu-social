@@ -60,8 +60,11 @@ u2f.register([challenge], [],
 );
 _END_OF_SCRIPT_;
 
+
         $challenge = $u2f->getRegisterData();
         $challenge_msg = json_encode($challenge[0]) . "\n";
+        $uid = common_current_user()->id; 
+        User_u2f_data::set_user_challenge($uid, $challenge_msg);
 
         $this->inlineScript(sprintf(
             $script,

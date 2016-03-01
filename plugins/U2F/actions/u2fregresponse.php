@@ -49,7 +49,13 @@ class U2fregresponseForm extends Form
             'fieldset',
             array('id' => 'settings_u2f_regresponse')
         );
+
+        $uid = common_current_user()->id;
+        $challenge_msg = User_u2f_data::get_user_challenge($uid);
+
+        $this->out->element('p', 'form_guide', $challenge_msg);
         $this->out->element('p', 'form_guide', $this->arg('response-input'));
+        
         $this->out->elementEnd('fieldset');
     }
 
