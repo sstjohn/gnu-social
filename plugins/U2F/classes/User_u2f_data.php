@@ -9,6 +9,7 @@ class User_u2f_data extends Managed_DataObject
     public $__table = 'user_u2f_data';
     public $user_id;
     public $required;
+    public $outstanding_challenge;
 
     public static function schemaDef()
     {

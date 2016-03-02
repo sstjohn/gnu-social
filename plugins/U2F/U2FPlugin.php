@@ -25,6 +25,7 @@ class U2FPlugin extends Plugin
         $schema = Schema::get();
 
         $schema->ensureTable('user_u2f_data', User_u2f_data::schemaDef());
+        $schema->ensureTable('user_u2f_device', User_u2f_device::schemaDef());
 
         return true;
     }
