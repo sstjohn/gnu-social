@@ -75,13 +75,13 @@ _END_OF_SCRIPT_;
             'fieldset',
             array('id' => 'settings_u2f_register')
         );
-        $this->out->element('p', 'form_guide', $challenge_msg);
+        $this->out->element('p', 'form_guide', 'Activate U2F device to continue...');
         $this->out->hidden('response-input', '');
         $this->out->elementEnd('fieldset');
     }
 
     public function formActions()
     {
-        $this->out->submit('receive-response', _m('BUTTON', 'blah', 'hidden'));
+        $this->out->submit('receive-response', "submit", "hidden");
     }
 }
