@@ -17,8 +17,10 @@ class User_u2f_device extends Managed_DataObject
         return array(
             'fields' => array(
                 'device_id' => array('type' => 'serial', 'not null' => true, 'description' => 'primary key'),
-                'keyHandle' => array('type' => 'varchar', 'length'=>128, 'not null' => true, 'description' => 'key handle'),
                 'user_id' => array('type' => 'int', 'not null' => true, 'description' => 'user id'),
+                'keyHandle' => array('type' => 'varchar', 'length'=>255, 'not null' => true, 'description' => 'key handle'),
+                'publicKey' => array('type' => 'varchar', 'length'=>255, 'not null' => true, 'description' => 'registered device public key'),
+                'certificate' => array('type' => 'text', 'not null' => true, 'description' => 'device attestation certificate'),
                 'counter' => array('type' => 'int', 'not null' => true, 'description' => 'device usage counter'),
             ),
             'primary key' => array('device_id'),
@@ -31,8 +33,10 @@ class User_u2f_device extends Managed_DataObject
     public static function add_user_device($user_id, $registration_result)
     {
         $udev = new User_u2f_device();
-        $udev->keyHandle = $registration_result->keyHandle;
         $udev->user_id = $user_id;
+        $udev->keyHandle = $registration_result->keyHandle;
+        $udev->publicKey = $registration_result->publicKey;
+        $udev->certificate = $registration_result->certificate;
         $udev->counter = $registration_result->counter;
         $result = $udev->insert();
         if (!$result) {

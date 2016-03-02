@@ -36,6 +36,7 @@ class U2FPlugin extends Plugin
         $m->connect('settings/u2f/register', array('action' => 'u2fregister'));
         $m->connect('settings/u2f/registration_response', array('action' => 'u2fregresponse'));
         $m->connect('login/u2f/challenge', array('action' => 'u2fcheck'));
+        $m->connect('login/u2f/response', array('action' => 'u2fcheckres'));
         return true;
     }
 
@@ -55,6 +56,7 @@ class U2FPlugin extends Plugin
     {
         static $needy = array(
             'U2fregisterAction',
+            'U2fcheckAction',
         );
 
         if (in_array(get_class($action), $needy)) {
@@ -64,13 +66,6 @@ class U2FPlugin extends Plugin
         return true;
     }
 
-    public function onStartSetUser($user)
-    {
-        if (User_u2f_data::get_device_requirement($user->id)) {
-            common_redirect(common_local_url('u2fcheck'));
-        }
-    }
-            
     public function onPluginVersion(array &$versions)
     {
         $versions[] = array('name' => 'U2F',

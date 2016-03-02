@@ -5,7 +5,7 @@ if (!defined('STATUSNET')) {
 }
 
 
-class U2fcheckAction extends Action
+class U2fcheckAction extends FormAction
 {
     public function title()
     {
@@ -14,15 +14,20 @@ class U2fcheckAction extends Action
 
     public function getInstructions()
     {
-        return _m('U2F registration');
+        return _m('U2F authentication');
     }
 
-    public function showForm()
+    public function showContent()
     {
         $form  = new U2fcheckForm($this);
         $form->show();
         return;
     }
+
+    public function showPrimaryNav() { }
+    public function showNoticeForm() { }
+    public function showLocalNav() { }
+    public function showAside() { }
 }
 
 class U2fcheckForm extends Form
@@ -37,37 +42,38 @@ class U2fcheckForm extends Form
         return common_local_url('u2fcheckres');
     }
 
+    public function formClass()
+    {
+        return 'form';
+    }
+
     public function formData()
     {
         $u2f = new u2flib_server\U2F("https://" . $_SERVER['HTTP_HOST']);
         $script = <<<_END_OF_SCRIPT_
 
-var challenge = %s;
-var devices = %s;
-u2f.register([challenge], devices,
+u2f.sign(%s,
     function(deviceResponse) {
       document.getElementById('response-input').value = JSON.stringify(deviceResponse);
-      document.getElementById('u2fregistrationform').submit();
+      document.getElementById('u2fcheckform').submit();
     }
 );
 _END_OF_SCRIPT_;
 
 
         $uid = common_current_user()->id; 
-        list($challenge, $sigs) = $u2f->getRegisterData(User_u2f_device::get_user_devices($uid));
-        $challenge_msg = json_encode($challenge);
-        User_u2f_data::set_user_challenge($uid, $challenge_msg);
-        $devices_msg = json_encode($sigs);
+        $sign_requests = $u2f->getAuthenticateData(User_u2f_device::get_user_devices($uid));
+        $sign_requests_msg = json_encode($sign_requests);
+        User_u2f_data::set_user_challenge($uid, $sign_requests_msg);
 
         $this->inlineScript(sprintf(
             $script,
-            $challenge_msg,
-            $devices_msg
+            $sign_requests_msg
         ));
 
         $this->out->elementStart(
             'fieldset',
-            array('id' => 'settings_u2f_register')
+            array('id' => 'login_u2f_check')
         );
         $this->out->element('p', 'form_guide', 'Activate U2F device to continue...');
         $this->out->hidden('response-input', '');
