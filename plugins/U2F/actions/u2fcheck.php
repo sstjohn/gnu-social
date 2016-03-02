@@ -64,7 +64,7 @@ _END_OF_SCRIPT_;
         $uid = common_current_user()->id; 
         $sign_requests = $u2f->getAuthenticateData(User_u2f_device::get_user_devices($uid));
         $sign_requests_msg = json_encode($sign_requests);
-        User_u2f_data::set_user_challenge($uid, $sign_requests_msg);
+        $_SESSION['u2f-auth-data'] = $sign_requests_msg;
 
         $this->inlineScript(sprintf(
             $script,

@@ -65,7 +65,7 @@ _END_OF_SCRIPT_;
         $uid = common_current_user()->id; 
         list($challenge, $sigs) = $u2f->getRegisterData(User_u2f_device::get_user_devices($uid));
         $challenge_msg = json_encode($challenge);
-        User_u2f_data::set_user_challenge($uid, $challenge_msg);
+        $_SESSION['u2f-reg-data'] = $challenge_msg;
         $devices_msg = json_encode($sigs);
 
         $this->inlineScript(sprintf(

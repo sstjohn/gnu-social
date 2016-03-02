@@ -53,7 +53,7 @@ class U2fregresponseForm extends Form
         $u2f = new u2flib_server\U2F("https://" . $_SERVER['HTTP_HOST']);
 
         $uid = common_current_user()->id;
-        $challenge_msg = User_u2f_data::get_user_challenge($uid);
+        $challenge_msg = $_SESSION['u2f-reg-data'];
         $challenge = json_decode($challenge_msg);
 
         $response_msg = $this->arg("response-input");

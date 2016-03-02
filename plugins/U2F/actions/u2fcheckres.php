@@ -25,7 +25,7 @@ class U2fcheckresAction extends Action
         $response_msg = $this->arg('response-input');
         $response = json_decode($response_msg);
 
-        $requests_msg = User_u2f_data::get_user_challenge($uid);
+        $requests_msg = $_SESSION['u2f-auth-data'];
         $requests = json_decode($requests_msg);
 
         $registrations = User_u2f_device::get_user_devices($uid);
