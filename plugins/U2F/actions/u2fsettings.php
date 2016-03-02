@@ -34,7 +34,7 @@ class U2fsettingsAction extends SettingsAction
         } else if ($this->arg('deldev')) {
             User_u2f_device::del_user_device(common_current_user()->id, $this->arg('keyselection'));
         } else if ($this->arg('submit')) {
-            return _('Settings saved.');
+            User_u2f_data::set_device_requirement(common_current_user()->id, $this->boolean('u2f_required'));
         }
     }
 }
@@ -58,6 +58,7 @@ class U2fSettingsForm extends Form
 
     public function formData()
     {
+        $uid = common_current_user()->id;
         $this->out->elementStart(
             'fieldset',
             array('id' => 'settings_u2f')
@@ -66,17 +67,17 @@ class U2fSettingsForm extends Form
 
         $this->li();
         $this->out->checkbox(
-            'enabled', 
-            _m('Enable U2F authentication'),
-            false ,
-            _m("Enable two-factor authentication with U2F.")
+            'u2f_required', 
+            _m('Require U2F authentication'),
+            User_u2f_data::get_device_requirement($uid) ,
+            _m("Require two-factor authentication with U2F upon login.")
         );
         $this->unli();
 
         $this->out->elementEnd('ul');
         $this->out->element('p', '', 'Registered Devices');
         $this->out->elementStart('ul');
-        $devices = User_u2f_device::get_user_devices(common_current_user()->id);
+        $devices = User_u2f_device::get_user_devices($uid);
         foreach ($devices as $d) {
             $this->li();
             $this->out->elementStart('div');

@@ -53,4 +53,31 @@ class User_u2f_data extends Managed_DataObject
         }
         return '';
     }
+
+    public static function set_device_requirement($user_id, $v)
+    {
+        $udata = User_u2f_data::getKV('user_id', $user_id);
+        if (empty($udata)) {
+            $udata = new User_u2f_data();
+            $udata->user_id = $user_id;
+            $udata->required = $v;
+            $result = $udata->insert();
+        } else {
+            $orig = clone($udata);
+            $udata->required = $v;
+            $result = $udata->update($orig);
+        }
+        if (!$result) {
+            throw new Exception(sprintf(_m('Count not set device requirement for user %d.'), $user_id));
+        }
+    }
+
+    public static function get_device_requirement($user_id)
+    {
+        $udata = User_u2f_data::getKV('user_id', $user_id);
+        if (empty($udata)) {
+            return false;
+        }
+        return $udata->required;
+    }
 }
