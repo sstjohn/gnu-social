@@ -5,7 +5,7 @@ if (!defined('STATUSNET')) {
 }
 
 
-class U2fregresponseAction extends SettingsAction
+class U2f_reg_finishAction extends SettingsAction
 {
     public function title()
     {
@@ -16,21 +16,13 @@ class U2fregresponseAction extends SettingsAction
     {
         return _m('U2F registration response');
     }
-
-    public function showForm()
-    {
-        $form  = new U2fregresponseForm($this);
-        $form->show();
-        return;
-    }
-
 }
 
-class U2fregresponseForm extends Form
+class U2f_reg_finishForm extends Form
 {
     public function id()
     {
-        return 'u2fregresponse';
+        return 'u2f_reg_result';
     }
 
     public function formClass()
@@ -45,11 +37,6 @@ class U2fregresponseForm extends Form
 
     public function formData()
     {
-        $this->out->elementStart(
-            'fieldset',
-            array('id' => 'settings_u2f_regresponse')
-        );
-
         $u2f = new u2flib_server\U2F("https://" . $_SERVER['HTTP_HOST']);
 
         $uid = common_current_user()->id;
@@ -69,8 +56,6 @@ class U2fregresponseForm extends Form
         }
 
         $this->out->element('p', 'form_guide', sprintf('registration result: %s', $msg));
-
-        $this->out->elementEnd('fieldset');
     }
 
     public function formActions()

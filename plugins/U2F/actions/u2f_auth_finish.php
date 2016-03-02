@@ -5,7 +5,7 @@ if (!defined('STATUSNET')) {
 }
 
 
-class U2fcheckresAction extends Action
+class U2f_auth_finishAction extends Action
 {
     public function title()
     {

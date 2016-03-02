@@ -33,10 +33,10 @@ class U2FPlugin extends Plugin
     public function onRouterInitialized(URLMapper $m)
     {
         $m->connect('settings/u2f', array('action' => 'u2fsettings'));
-        $m->connect('settings/u2f/register', array('action' => 'u2fregister'));
-        $m->connect('settings/u2f/registration_response', array('action' => 'u2fregresponse'));
-        $m->connect('login/u2f/challenge', array('action' => 'u2fcheck'));
-        $m->connect('login/u2f/response', array('action' => 'u2fcheckres'));
+        $m->connect('settings/u2f/register_start', array('action' => 'u2f_reg_start'));
+        $m->connect('settings/u2f/register_finish', array('action' => 'u2f_reg_finish'));
+        $m->connect('login/u2f/challenge', array('action' => 'u2f_auth_start'));
+        $m->connect('login/u2f/response', array('action' => 'u2f_auth_finish'));
         return true;
     }
 
@@ -55,8 +55,8 @@ class U2FPlugin extends Plugin
     public function onEndShowHeadElements($action)
     {
         static $needy = array(
-            'U2fregisterAction',
-            'U2fcheckAction',
+            'U2f_reg_startAction',
+            'U2f_auth_startAction',
         );
 
         if (in_array(get_class($action), $needy)) {

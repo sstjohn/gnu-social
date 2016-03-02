@@ -30,7 +30,7 @@ class U2fsettingsAction extends SettingsAction
     protected function doPost()
     {
         if ($this->arg('newdev')) {
-            common_redirect(common_local_url('u2fregister'), 307);
+            common_redirect(common_local_url('u2f_reg_start'), 307);
         } else if ($this->arg('deldev')) {
             User_u2f_device::del_user_device(common_current_user()->id, $this->arg('keyselection'));
         } else if ($this->arg('submit')) {

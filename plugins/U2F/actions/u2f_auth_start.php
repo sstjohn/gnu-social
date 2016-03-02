@@ -5,7 +5,7 @@ if (!defined('STATUSNET')) {
 }
 
 
-class U2fcheckAction extends FormAction
+class U2f_auth_startAction extends FormAction
 {
     public function title()
     {
@@ -19,7 +19,7 @@ class U2fcheckAction extends FormAction
 
     public function showContent()
     {
-        $form  = new U2fcheckForm($this);
+        $form  = new U2f_auth_startForm($this);
         $form->show();
         return;
     }
@@ -30,16 +30,16 @@ class U2fcheckAction extends FormAction
     public function showAside() { }
 }
 
-class U2fcheckForm extends Form
+class U2f_auth_startForm extends Form
 {
     public function id()
     {
-        return 'u2fcheckform';
+        return 'u2f_auth_form';
     }
 
     public function action()
     {
-        return common_local_url('u2fcheckres');
+        return common_local_url('u2f_auth_finish');
     }
 
     public function formClass()
@@ -55,7 +55,7 @@ class U2fcheckForm extends Form
 u2f.sign(%s,
     function(deviceResponse) {
       document.getElementById('response-input').value = JSON.stringify(deviceResponse);
-      document.getElementById('u2fcheckform').submit();
+      document.getElementById('u2f_auth_form').submit();
     }
 );
 _END_OF_SCRIPT_;
@@ -71,13 +71,8 @@ _END_OF_SCRIPT_;
             $sign_requests_msg
         ));
 
-        $this->out->elementStart(
-            'fieldset',
-            array('id' => 'login_u2f_check')
-        );
         $this->out->element('p', 'form_guide', 'Activate U2F device to continue...');
         $this->out->hidden('response-input', '');
-        $this->out->elementEnd('fieldset');
     }
 
     public function formActions()

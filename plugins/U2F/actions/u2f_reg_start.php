@@ -5,7 +5,7 @@ if (!defined('STATUSNET')) {
 }
 
 
-class U2fregisterAction extends SettingsAction
+class U2f_reg_startAction extends SettingsAction
 {
     public function title()
     {
@@ -19,7 +19,7 @@ class U2fregisterAction extends SettingsAction
 
     public function showForm()
     {
-        $form  = new U2fRegisterForm($this);
+        $form  = new U2f_reg_startForm($this);
         $form->show();
         return;
     }
@@ -29,11 +29,11 @@ class U2fregisterAction extends SettingsAction
     }   
 }
 
-class U2fRegisterForm extends Form
+class U2f_reg_startForm extends Form
 {
     public function id()
     {
-        return 'u2fregistrationform';
+        return 'u2f_reg_form';
     }
 
     public function formClass()
@@ -43,7 +43,7 @@ class U2fRegisterForm extends Form
 
     public function action()
     {
-        return common_local_url('u2fregresponse');
+        return common_local_url('u2f_reg_finish');
     }
 
     public function formData()
@@ -56,7 +56,7 @@ var devices = %s;
 u2f.register([challenge], devices,
     function(deviceResponse) {
       document.getElementById('response-input').value = JSON.stringify(deviceResponse);
-      document.getElementById('u2fregistrationform').submit();
+      document.getElementById('u2f_reg_form').submit();
     }
 );
 _END_OF_SCRIPT_;
@@ -74,13 +74,8 @@ _END_OF_SCRIPT_;
             $devices_msg
         ));
 
-        $this->out->elementStart(
-            'fieldset',
-            array('id' => 'settings_u2f_register')
-        );
         $this->out->element('p', 'form_guide', 'Activate U2F device to continue...');
         $this->out->hidden('response-input', '');
-        $this->out->elementEnd('fieldset');
     }
 
     public function formActions()
