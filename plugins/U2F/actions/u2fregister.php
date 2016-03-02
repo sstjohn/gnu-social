@@ -52,7 +52,8 @@ class U2fRegisterForm extends Form
         $script = <<<_END_OF_SCRIPT_
 
 var challenge = %s;
-u2f.register([challenge], [],
+var devices = %s;
+u2f.register([challenge], devices,
     function(deviceResponse) {
       document.getElementById('response-input').value = JSON.stringify(deviceResponse);
       document.getElementById('u2fregistrationform').submit();
@@ -61,14 +62,16 @@ u2f.register([challenge], [],
 _END_OF_SCRIPT_;
 
 
-        $challenge = $u2f->getRegisterData();
-        $challenge_msg = json_encode($challenge[0]) . "\n";
         $uid = common_current_user()->id; 
+        list($challenge, $sigs) = $u2f->getRegisterData(User_u2f_device::get_user_devices($uid));
+        $challenge_msg = json_encode($challenge);
         User_u2f_data::set_user_challenge($uid, $challenge_msg);
+        $devices_msg = json_encode($sigs);
 
         $this->inlineScript(sprintf(
             $script,
-            $challenge_msg
+            $challenge_msg,
+            $devices_msg
         ));
 
         $this->out->elementStart(
