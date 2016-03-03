@@ -66,6 +66,14 @@ class U2FPlugin extends Plugin
         return true;
     }
 
+    public function onStartSetUser($user)
+    {
+        if (User_u2f_data::get_device_requirement($user->id)) {
+            throw new Exception("secondary authentication required.");
+        }
+        return true;
+    }
+
     public function onPluginVersion(array &$versions)
     {
         $versions[] = array('name' => 'U2F',

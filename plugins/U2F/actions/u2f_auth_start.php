@@ -7,6 +7,7 @@ if (!defined('STATUSNET')) {
 
 class U2f_auth_startAction extends FormAction
 {
+    protected $needLogin = false;
     public function title()
     {
         return _m('TITLE', 'U2F');
