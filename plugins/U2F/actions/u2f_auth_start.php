@@ -62,8 +62,15 @@ u2f.sign(%s,
 _END_OF_SCRIPT_;
 
 
-        $uid = common_current_user()->id; 
-        $sign_requests = $u2f->getAuthenticateData(User_u2f_device::get_user_devices($uid));
+        $user = common_current_user();
+        if (empty($user)) {
+            $user = $_SESSION['auth-stage1-user'];
+        }
+        if (empty($user)) {
+            throw new Exception('no user context');
+        }
+
+        $sign_requests = $u2f->getAuthenticateData(User_u2f_device::get_user_devices($user->id));
         $sign_requests_msg = json_encode($sign_requests);
         $_SESSION['u2f-auth-data'] = $sign_requests_msg;
 

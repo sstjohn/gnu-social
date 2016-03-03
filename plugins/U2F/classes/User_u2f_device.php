@@ -60,5 +60,16 @@ class User_u2f_device extends Managed_DataObject
     {
         return User_u2f_device::multiGet('user_id', array($user_id))->fetchAll();
     }
-        
+
+    public static function update_counter($updated)
+    {
+        $udev = User_u2f_device::getKV('device_id', $updated->device_id);
+        if (empty($udev)) {
+            throw new Exception(sprintf(_m('No device with ID %d found.'), $updated->device_id));
+        }
+
+        $orig = clone($udev);
+        $udev->counter = $updated->counter;
+        $udev->update($orig);
+    }       
 }

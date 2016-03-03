@@ -33,10 +33,10 @@ class U2FPlugin extends Plugin
     public function onRouterInitialized(URLMapper $m)
     {
         $m->connect('settings/u2f', array('action' => 'u2fsettings'));
-        $m->connect('settings/u2f/register_start', array('action' => 'u2f_reg_start'));
-        $m->connect('settings/u2f/register_finish', array('action' => 'u2f_reg_finish'));
-        $m->connect('login/u2f/challenge', array('action' => 'u2f_auth_start'));
-        $m->connect('login/u2f/response', array('action' => 'u2f_auth_finish'));
+        $m->connect('u2f/register/start', array('action' => 'u2f_reg_start'));
+        $m->connect('u2f/register/finish', array('action' => 'u2f_reg_finish'));
+        $m->connect('u2f/auth/start', array('action' => 'u2f_auth_start'));
+        $m->connect('u2f/auth/finish', array('action' => 'u2f_auth_finish'));
         return true;
     }
 
@@ -68,8 +68,13 @@ class U2FPlugin extends Plugin
 
     public function onStartSetUser($user)
     {
-        if (User_u2f_data::get_device_requirement($user->id)) {
-            throw new Exception("secondary authentication required.");
+        if ($_SESSION['auth-stage2-done']) {
+            unset($_SESSION['auth-stage2-done']);
+            return true;
+        } else if (User_u2f_data::get_device_requirement($user->id)) {
+            $_SESSION['auth-stage1-user'] = $user;
+            common_redirect(common_local_url("u2f_auth_start"), 303);
+            return false;
         }
         return true;
     }
