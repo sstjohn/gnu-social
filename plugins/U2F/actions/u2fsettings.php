@@ -82,7 +82,7 @@ class U2fSettingsForm extends Form
             $this->li();
             $this->out->elementStart('div');
             $this->out->element('input', array('type' => 'radio', 'name' => 'keyselection', 'value' => $d->device_id));
-            $this->out->element('span', '', $d->keyHandle);
+            $this->out->element('span', '', Certificate::parse_certificate($d->certificate)['subject']['CN']);
             $this->out->elementEnd('div');
             $this->unli();
         }
